@@ -7,6 +7,20 @@ import { OSM, Vector as VectorSource } from "ol/source.js";
 import { Tile as TileLayer, Vector as VectorLayer } from "ol/layer.js";
 import { get } from "ol/proj.js";
 import GeoJSON from "ol/format/GeoJSON.js";
+import Overlay from "ol/Overlay.js";
+
+let mode = "Geometry";
+document.getElementById("mode").addEventListener("change", () => {
+  mode = document.getElementById("mode").value;
+
+  document.body.classList.value = [`mode-${mode}`];
+
+  if (mode === "Properties") {
+    removeInteractions();
+  } else {
+    addInteractions();
+  }
+});
 
 const raster = new TileLayer({
   source: new OSM(),
@@ -20,15 +34,35 @@ const vector = new VectorLayer({
     "stroke-color": "#ffcc33",
     "stroke-width": 2,
     "circle-radius": 7,
-    "circle-fill-color": "#ffcc33",
+    "circle-fill-color": "#ffcc33"
   },
 });
+
+const container = document.getElementById("popup");
+const content = document.getElementById("popup-content");
+const closer = document.getElementById("popup-closer");
+
+const overlay = new Overlay({
+  element: container,
+  autoPan: {
+    animation: {
+      duration: 250,
+    },
+  },
+});
+
+closer.onclick = function () {
+  overlay.setPosition(undefined);
+  closer.blur();
+  return false;
+};
 
 const extent = get("EPSG:3857").getExtent().slice();
 extent[0] += extent[0];
 extent[2] += extent[2];
 const map = new Map({
   layers: [raster, vector],
+  overlays: [overlay],
   target: "map",
   view: new View({
     center: [-11000000, 4600000],
@@ -53,9 +87,13 @@ function addInteractions() {
   map.addInteraction(snap);
 }
 
-typeSelect.onchange = function () {
+function removeInteractions() {
   map.removeInteraction(draw);
   map.removeInteraction(snap);
+}
+
+typeSelect.onchange = function () {
+  removeInteractions();
   addInteractions();
 };
 
@@ -103,3 +141,40 @@ fileToRead.addEventListener(
   },
   false
 );
+
+map.on("singleclick", function (evt) {
+  if (mode === "Properties") {
+    let feature = map.forEachFeatureAtPixel(
+      evt.pixel,
+      function (feature) {
+        return feature;
+      },
+      {
+        layerFilter: function (layer) {
+          return layer === vector;
+        },
+      }
+    );
+    if (feature && vector.getSource().hasFeature(feature)) {
+      content.innerHTML = "";
+
+      const label = document.createElement("label");
+      const textnode = document.createTextNode("Name: ");
+      label.appendChild(textnode);
+
+      const input = document.createElement("input");
+      input.type = "text";
+      input.value = feature.get("name") || "";
+      input.addEventListener("change", () => {
+        feature.set("name", input.value);
+      });
+
+      label.appendChild(input);
+      content.appendChild(label);
+
+      overlay.setPosition(evt.coordinate);
+    } else {
+      overlay.setPosition(undefined);
+    }
+  }
+});

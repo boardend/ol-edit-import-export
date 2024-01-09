@@ -14,6 +14,15 @@
     <div id="header">
       <div>
         <form>
+          <label for="mode">Mode &nbsp;</label>
+          <select id="mode">
+            <option value="Geometry">Geometry</option>
+            <option value="Properties">Properties</option>
+          </select>
+        </form>
+      </div>
+      <div id="geometrytype">
+        <form>
           <label for="type">Geometry type &nbsp;</label>
           <select id="type">
             <option value="Point">Point</option>
@@ -28,20 +37,12 @@
         <label for="import">Import GeoJSON:</label>
         <input type="file" id="import" name="import" accept=".json,.geojson" />
       </div>
-      <div>
-        <span>
-          Based on
-          <a
-            href="https://openlayers.org/en/latest/examples/draw-and-modify-features.html"
-            >Draw and Modify Features</a
-          >
-          example
-          <br />
-          <a>see source code on GitHub</a>
-        </span>
-      </div>
     </div>
     <div id="map"></div>
+    <div id="popup" class="ol-popup">
+      <a href="#" id="popup-closer" class="ol-popup-closer"></a>
+      <div id="popup-content"></div>
+    </div>
     <script type="module" src="./main.js"></script>
   </body>
 </html>
