@@ -2,11 +2,45 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/x-icon" href="https://openlayers.org/favicon.ico" />
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="https://openlayers.org/favicon.ico"
+    />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Using OpenLayers with Vite</title>
   </head>
   <body>
+    <div id="header">
+      <div>
+        <form>
+          <label for="type">Geometry type &nbsp;</label>
+          <select id="type">
+            <option value="Point">Point</option>
+            <option value="LineString">LineString</option>
+            <option value="Polygon">Polygon</option>
+            <option value="Circle">Circle</option>
+          </select>
+        </form>
+      </div>
+      <div><button id="export">Export GeoJSON</button> to a file</div>
+      <div>
+        <label for="import">Import GeoJSON:</label>
+        <input type="file" id="import" name="import" accept=".json,.geojson" />
+      </div>
+      <div>
+        <span>
+          Based on
+          <a
+            href="https://openlayers.org/en/latest/examples/draw-and-modify-features.html"
+            >Draw and Modify Features</a
+          >
+          example
+          <br />
+          <a>see source code on GitHub</a>
+        </span>
+      </div>
+    </div>
     <div id="map"></div>
     <script type="module" src="./main.js"></script>
   </body>
