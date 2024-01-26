@@ -2,7 +2,8 @@ import "./style.css";
 
 import Map from "ol/Map.js";
 import View from "ol/View.js";
-import { Draw, Modify, Snap } from "ol/interaction.js";
+import { Draw, Modify, Snap, Select } from "ol/interaction.js";
+import { click } from 'ol/events/condition.js';
 import { OSM, Vector as VectorSource } from "ol/source.js";
 import { Tile as TileLayer, Vector as VectorLayer } from "ol/layer.js";
 import { get } from "ol/proj.js";
@@ -74,17 +75,40 @@ const map = new Map({
 const modify = new Modify({ source: source });
 map.addInteraction(modify);
 
-let draw, snap;
+let draw, snap, select;
 const typeSelect = document.getElementById("type");
 
 function addInteractions() {
   draw = new Draw({
     source: source,
-    type: typeSelect.value,
+    type: "Point",
+    condition: function (e) {
+      // test if current pixel/coordinate will be snapped
+      const res = snap.snapTo(e.pixel_, e.coordinate_, map);
+      return !res;
+    }
+  });
+  draw.on("drawend", (e) => {
+    // feature is drawn, but we don't handle it here, because it will also be handled by the select interaction
+    // console.log("draw", e);
   });
   map.addInteraction(draw);
   snap = new Snap({ source: source });
   map.addInteraction(snap);
+  select = new Select({
+    condition: click,
+    source: source,
+    hitTolerance: 10, // same as snap tolerance
+  });
+  select.on("select", (e) => {
+    if (e.selected.length > 0) {
+      const feature = e.selected[0];
+      console.log("feature", feature);
+      // --> do form logic with "feature" here <--
+      select.getFeatures().clear();
+    }
+  });
+  map.addInteraction(select);
 }
 
 function removeInteractions() {
